@@ -405,8 +405,31 @@ function initMap(lat = 48.8566, lon = 2.3522) {
   const tripList = document.getElementById('trip-list');
   tripList.innerHTML = trips.map(trip => {
     const user = users.find(u => u.email === trip.userEmail);
-    return `<li><b>${user ? user.prenom + ' ' + user.nom : trip.userEmail}</b> : ${trip.date} ${trip.time} <br>${trip.from} → ${trip.to}</li>`;
+    let videoEmbed = '';
+    if (trip.video) {
+      const match = trip.video.match(/(?:v=|youtu.be\/)([\w-]{11})/);
+      if (match) {
+        videoEmbed = `<div style='margin:8px 0;'><iframe width='220' height='124' src='https://www.youtube.com/embed/${match[1]}' frameborder='0' allowfullscreen></iframe></div>`;
+      }
+    }
+    return `<div style='margin-bottom:8px;'>
+      <b>${user ? user.prenom + ' ' + user.nom : trip.userEmail}</b><br>
+      ${trip.date} ${trip.time}<br>
+      ${trip.from} → ${trip.to}<br>
+      ${videoEmbed}
+      <a href="#" class="view-profile-link" data-email="${trip.userEmail}">Voir profil</a>
+    </div>`;
   }).join('');
+  setTimeout(() => {
+    document.querySelectorAll('.view-profile-link').forEach(link => {
+      link.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        const email = ev.target.getAttribute('data-email');
+        window.renderViewProfile(email);
+        map.closePopup();
+      });
+    });
+  }, 0);
 }
 
 // Initialisation
